@@ -1,6 +1,8 @@
-import { client } from "@/sanity/lib/client";
+import { defineQuery } from "next-sanity";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
+import { client } from "@/sanity/lib/client";
+
 interface Blog {
   _id: string;
   title: string;
@@ -13,12 +15,13 @@ interface Blog {
   };
 }
 
-const getBlogs = async () => {
-  return client.fetch(`*[_type =='blogs']`);
-};
-export default async function Home() {
-  const blogs = await getBlogs();
-  console.log("🚀 ~ Home ~ blogs:", blogs);
+const options = { next: { revalidate: 0 } };
+
+const QUERY = defineQuery(`*[_type =='blogs']`);
+
+export default async function IndexPage() {
+  const blogs = await client.fetch(QUERY, {}, options);
+  console.log(blogs);
 
   return (
     <main className="p-10">
@@ -36,8 +39,8 @@ export default async function Home() {
               width={300}
               height={150}
               className="
-              pt-4 pb-5
-       "
+            pt-4 pb-5
+     "
             />
             <p>{blog.description}</p>
           </div>
@@ -46,7 +49,14 @@ export default async function Home() {
     </main>
   );
 }
+
 // import { client } from "@/sanity/lib/client";
+// import { groq } from "next-sanity";
+// import Image from "next/image";
+// import { urlFor } from "@/sanity/lib/image";
+// import { createClient } from "next-sanity";
+
+// const cache = { next: { revalidatePath: 30 } };
 // interface Blog {
 //   _id: string;
 //   title: string;
@@ -59,26 +69,36 @@ export default async function Home() {
 //   };
 // }
 
-// // import { urlFor } from "@/sanity/lib/image";
 // const getBlogs = async () => {
-//   return client.fetch(`*[_type =='blogs']`);
+//   return client.fetch(groq`*[_type =='blogs']`, {}, cache);
 // };
 // export default async function Home() {
 //   const blogs = await getBlogs();
-//   console.log(blogs);
+//   console.log("🚀 ~ Home ~ blogs:", blogs);
+
 //   return (
-//     <>
-//       <div className="title text-green-800 bg-zinc-400">
+//     <main className="p-10">
+//       <header className="title text-green-800 bg-zinc-400">
+//         {" "}
 //         Famous Pakistani Cities
-//       </div>
-//       <div>
-//         {blogs.map((blog: Blog) => {
+//       </header>
+//       <div className="flex gap-5 ">
+//         {blogs.map((blog: Blog) => (
 //           <div key={blog._id} className="border rounded-md shadow-lg p-5">
-//             <h1>{blog.title}</h1>
+//             <h1 className="font-serif text-2xl">{blog.title}</h1>
+//             <Image
+//               src={urlFor(blog.image.asset).url()}
+//               alt={blog.title}
+//               width={300}
+//               height={150}
+//               className="
+//               pt-4 pb-5
+//        "
+//             />
 //             <p>{blog.description}</p>
-//           </div>;
-//         })}
+//           </div>
+//         ))}
 //       </div>
-//     </>
+//     </main>
 //   );
 // }
